@@ -21,6 +21,22 @@ jobs:
           docker compose down || true
           docker compose up -d --build
 
+      - name: Health check
+        run: |
+          sleep 5
+          for i in {1..15}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/health 2>/dev/null || echo "000")
+            echo "Status: $STATUS ($i/15)"
+            if [ "$STATUS" = "200" ]; then
+              echo "Health check passed!"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Health check failed!"
+          docker compose down || true
+          exit 1
+
       - name: Notify self-healing
         if: failure()
         run: |
