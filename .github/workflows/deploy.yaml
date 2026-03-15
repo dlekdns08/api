@@ -20,3 +20,11 @@ jobs:
         run: |
           docker compose down || true
           docker compose up -d --build
+
+      - name: Notify self-healing
+        if: failure()
+        run: |
+          curl -X POST http://5.104.87.242:8080/webhook/ci \
+            -H 'Content-Type: application/json' \
+            -H "x-ci-token: ${{ secrets.CI_WEBHOOK_TOKEN }}" \
+            -d "{\"repo\":\"dlekdns08/api\",\"error_message\":\"Deploy failed\"}"
