@@ -21,15 +21,7 @@ jobs:
           pip install bandit --quiet --break-system-packages 2>/dev/null || \
             pip install bandit --quiet 2>/dev/null || true
           BANDIT_OUT=$(bandit -r . -ll --exclude ./.venv,./tests -f json 2>/dev/null || echo '{}')
-          HIGH=$(echo "$BANDIT_OUT" | python3 -c "
-import json, sys
-try:
-    data = json.load(sys.stdin)
-    issues = [i for i in data.get('results', []) if i.get('issue_severity') in ('HIGH', 'CRITICAL')]
-    print(len(issues))
-except:
-    print(0)
-" 2>/dev/null || echo "0")
+          HIGH=$(echo "$BANDIT_OUT" | python3 -c "import json,sys; d=json.load(sys.stdin); print(len([i for i in d.get('results',[]) if i.get('issue_severity') in ('HIGH','CRITICAL')]))" 2>/dev/null || echo "0")
           if [ "$HIGH" -gt "0" ]; then
             echo "::error::보안 스캔 실패 — HIGH/CRITICAL 취약점 ${HIGH}개 발견"
             echo "$BANDIT_OUT" > /tmp/api_logs.txt
