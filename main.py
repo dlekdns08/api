@@ -7,7 +7,7 @@ from routes import comments, likes
 # 테이블 자동 생성
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="코알라 오딧세이 Blog API", version="1.0.0")
+app = FastAPI(title="코알라 오딧세이 Blog API", version="1.0.0"
 
 # CORS — Next.js 개발 서버 및 프로덕션 도메인 허용
 app.add_middleware(
