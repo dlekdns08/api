@@ -19,7 +19,7 @@ SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
 SMTP_USER = os.environ.get("SMTP_USER", "")
 SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "")
 BLOG_URL = os.environ.get("BLOG_URL", "https://koala.ai.kr")
-API_URL = os.environ.get("API_URL", "http://5.104.87.242:8000")
+API_URL = os.environ.get("API_URL", "https://api.koala.ai.kr")
 NOTIFY_API_KEY = os.environ.get("NOTIFY_API_KEY", "")
 
 
