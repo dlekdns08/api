@@ -13,7 +13,14 @@ jobs:
       - name: Create .env
         run: |
           cat > .env << EOF
-          ALLOWED_ORIGINS=https://koala.ai.kr
+          ALLOWED_ORIGINS=https://koala.ai.kr,https://www.koala.ai.kr
+          SMTP_HOST=smtp.gmail.com
+          SMTP_PORT=587
+          SMTP_USER=${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
+          BLOG_URL=${{ secrets.BLOG_URL }}
+          API_URL=${{ secrets.API_URL }}
+          NOTIFY_API_KEY=${{ secrets.NOTIFY_API_KEY }}
           EOF
 
       - name: Security scan
