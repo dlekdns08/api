@@ -18,8 +18,8 @@ jobs:
           SMTP_PORT=587
           SMTP_USER=${{ secrets.SMTP_USER }}
           SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
-          BLOG_URL=${{ secrets.BLOG_URL }}
-          API_URL=${{ secrets.API_URL }}
+          BLOG_URL=https://koala.ai.kr
+          API_URL=https://api.koala.ai.kr
           NOTIFY_API_KEY=${{ secrets.NOTIFY_API_KEY }}
           EOF
 
