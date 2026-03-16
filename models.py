@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from sqlalchemy import String, Text, DateTime, Integer, UniqueConstraint
+from sqlalchemy import String, Text, DateTime, Integer, UniqueConstraint, Boolean
 from sqlalchemy.orm import Mapped, mapped_column
 from database import Base
 
@@ -31,4 +31,18 @@ class Like(Base):
 
     __table_args__ = (
         UniqueConstraint("post_slug", "client_id", name="uq_like_per_client"),
+    )
+
+
+class Subscriber(Base):
+    __tablename__ = "subscribers"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
+    confirmed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    confirm_token: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    unsubscribe_token: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
     )
