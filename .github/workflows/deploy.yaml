@@ -34,13 +34,16 @@ jobs:
             sleep 5
           done
           echo "Health check failed!"
+          docker compose logs --no-color > /tmp/api_logs.txt 2>&1 || true
           docker compose down || true
           exit 1
 
       - name: Notify self-healing
         if: failure()
         run: |
+          LOGS=$(cat /tmp/api_logs.txt 2>/dev/null | tail -c 4000 || echo "Deploy failed")
+          PAYLOAD=$(jq -n --arg repo "dlekdns08/api" --arg logs "$LOGS" '{"repo":$repo,"logs":$logs}')
           curl -X POST http://5.104.87.242:8080/webhook/ci \
             -H 'Content-Type: application/json' \
             -H "x-ci-token: ${{ secrets.CI_WEBHOOK_TOKEN }}" \
-            -d "{\"repo\":\"dlekdns08/api\",\"error_message\":\"Deploy failed\"}"
+            -d "$PAYLOAD"
