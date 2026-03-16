@@ -13,7 +13,7 @@ jobs:
       - name: Create .env
         run: |
           cat > .env << EOF
-          ALLOWED_ORIGINS=http://5.104.87.242:3000
+          ALLOWED_ORIGINS=https://koala.ai.kr
           EOF
 
       - name: Security scan
