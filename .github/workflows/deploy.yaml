@@ -16,6 +16,17 @@ jobs:
           ALLOWED_ORIGINS=http://5.104.87.242:3000
           EOF
 
+      - name: Security scan
+        run: |
+          pip install bandit --quiet --break-system-packages 2>/dev/null || true
+          bandit -r . -ll --exit-zero -f txt 2>/dev/null || true
+          if bandit -r . -lll --exit-zero -f txt 2>/dev/null | grep -q "HIGH\|CRITICAL"; then
+            echo "::error::보안 스캔 실패 — HIGH/CRITICAL 취약점이 발견되었습니다."
+            bandit -r . -lll -f txt 2>/dev/null > /tmp/api_logs.txt || true
+            exit 1
+          fi
+          echo "Security scan passed."
+
       - name: Build and run
         run: |
           docker compose down || true
