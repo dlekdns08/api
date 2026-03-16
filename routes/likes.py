@@ -6,14 +6,14 @@ from database import get_db
 from models import Like
 from schemas import LikeToggle, LikeResponse
 
-router = APIRouter(prefix="/posts/{slug}/likes", tags=["likes"])
+router = APIRouter(prefix="/posts", tags=["likes"])
 
 
 def _count(db: Session, slug: str) -> int:
     return db.query(Like).filter(Like.post_slug == slug).count()
 
 
-@router.get("", response_model=LikeResponse)
+@router.get("/{slug:path}/likes", response_model=LikeResponse)
 def get_likes(slug: str, client_id: str, db: Session = Depends(get_db)):
     """좋아요 수 및 현재 클라이언트의 좋아요 여부 조회"""
     liked = (
@@ -25,7 +25,7 @@ def get_likes(slug: str, client_id: str, db: Session = Depends(get_db)):
     return LikeResponse(liked=liked, count=_count(db, slug))
 
 
-@router.post("", response_model=LikeResponse)
+@router.post("/{slug:path}/likes", response_model=LikeResponse)
 def toggle_like(slug: str, body: LikeToggle, db: Session = Depends(get_db)):
     """좋아요 토글 — 이미 눌렀으면 취소, 아니면 추가"""
     existing = (

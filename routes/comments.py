@@ -6,12 +6,12 @@ from database import get_db
 from models import Comment
 from schemas import CommentCreate, CommentResponse, CommentDelete
 
-router = APIRouter(prefix="/posts/{slug}/comments", tags=["comments"])
+router = APIRouter(prefix="/posts", tags=["comments"])
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-@router.get("", response_model=list[CommentResponse])
+@router.get("/{slug:path}/comments", response_model=list[CommentResponse])
 def get_comments(slug: str, db: Session = Depends(get_db)):
     """특정 포스트의 댓글 목록 조회"""
     return (
@@ -22,7 +22,7 @@ def get_comments(slug: str, db: Session = Depends(get_db)):
     )
 
 
-@router.post("", response_model=CommentResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/{slug:path}/comments", response_model=CommentResponse, status_code=status.HTTP_201_CREATED)
 def create_comment(slug: str, body: CommentCreate, db: Session = Depends(get_db)):
     """댓글 작성"""
     comment = Comment(
@@ -37,7 +37,7 @@ def create_comment(slug: str, body: CommentCreate, db: Session = Depends(get_db)
     return comment
 
 
-@router.delete("/{comment_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{slug:path}/comments/{comment_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_comment(
     slug: str,
     comment_id: int,
