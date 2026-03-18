@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
@@ -11,6 +12,27 @@ router = APIRouter(prefix="/posts", tags=["likes"])
 
 def _count(db: Session, slug: str) -> int:
     return db.query(Like).filter(Like.post_slug == slug).count()
+
+
+@router.get("/likes/bulk")
+def get_likes_bulk(
+    slugs: str = Query(..., description="쉼표로 구분된 슬러그 목록"),
+    db: Session = Depends(get_db),
+) -> dict[str, int]:
+    """여러 포스트의 좋아요 수를 한번에 조회 — { slug: count } 딕셔너리 반환"""
+    slug_list = [s.strip() for s in slugs.split(",") if s.strip()]
+    if not slug_list:
+        return {}
+    rows = (
+        db.query(Like.post_slug, func.count(Like.id).label("cnt"))
+        .filter(Like.post_slug.in_(slug_list))
+        .group_by(Like.post_slug)
+        .all()
+    )
+    counts: dict[str, int] = {slug: 0 for slug in slug_list}
+    for slug, cnt in rows:
+        counts[slug] = cnt
+    return counts
 
 
 @router.get("/{slug:path}/likes", response_model=LikeResponse)
