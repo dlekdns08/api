@@ -1,6 +1,7 @@
+import bcrypt
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from passlib.context import CryptContext
 
 from database import get_db
 from models import Comment
@@ -8,7 +9,13 @@ from schemas import CommentCreate, CommentResponse, CommentDelete
 
 router = APIRouter(prefix="/posts", tags=["comments"])
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def _hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
+
+def _verify_password(password: str, hashed: str) -> bool:
+    return bcrypt.checkpw(password.encode(), hashed.encode())
 
 
 @router.get("/{slug:path}/comments", response_model=list[CommentResponse])
@@ -28,7 +35,7 @@ def create_comment(slug: str, body: CommentCreate, db: Session = Depends(get_db)
     comment = Comment(
         post_slug=slug,
         nickname=body.nickname,
-        password_hash=pwd_context.hash(body.password),
+        password_hash=_hash_password(body.password),
         content=body.content,
     )
     db.add(comment)
@@ -53,7 +60,7 @@ def delete_comment(
     if not comment:
         raise HTTPException(status_code=404, detail="댓글을 찾을 수 없습니다.")
 
-    if not pwd_context.verify(body.password, comment.password_hash):
+    if not _verify_password(body.password, comment.password_hash):
         raise HTTPException(status_code=403, detail="비밀번호가 올바르지 않습니다.")
 
     db.delete(comment)
