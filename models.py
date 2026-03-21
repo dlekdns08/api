@@ -63,3 +63,15 @@ class Subscriber(Base):
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
     )
+
+
+class PostView(Base):
+    __tablename__ = "post_views"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    post_slug: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
+    views: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    last_viewed: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+    )
