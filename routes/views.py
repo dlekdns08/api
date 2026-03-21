@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from sqlalchemy.dialects.postgresql import insert
 
 from database import get_db
 from models import PostView
@@ -10,19 +9,16 @@ router = APIRouter(prefix="/posts", tags=["views"])
 
 @router.post("/{slug:path}/view")
 def increment_view(slug: str, db: Session = Depends(get_db)) -> dict:
-    """조회수 1 증가 (없으면 새로 생성)"""
-    stmt = (
-        insert(PostView)
-        .values(post_slug=slug, views=1)
-        .on_conflict_do_update(
-            index_elements=["post_slug"],
-            set_={"views": PostView.views + 1},
-        )
-    )
-    db.execute(stmt)
-    db.commit()
+    """조회수 1 증가 (없으면 새로 생성) — ORM upsert 방식"""
     row = db.query(PostView).filter(PostView.post_slug == slug).first()
-    return {"slug": slug, "views": row.views if row else 1}
+    if row:
+        row.views += 1
+    else:
+        row = PostView(post_slug=slug, views=1)
+        db.add(row)
+    db.commit()
+    db.refresh(row)
+    return {"slug": slug, "views": row.views}
 
 
 @router.get("/views/bulk")
@@ -35,7 +31,7 @@ def get_views_bulk(
     if not slug_list:
         return {}
     rows = db.query(PostView).filter(PostView.post_slug.in_(slug_list)).all()
-    result = {slug: 0 for slug in slug_list}
+    result = {s: 0 for s in slug_list}
     for row in rows:
         result[row.post_slug] = row.views
     return result
