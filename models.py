@@ -12,6 +12,9 @@ class Comment(Base):
     nickname: Mapped[str] = mapped_column(String(50), nullable=False)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
+    parent_id: Mapped[int | None] = mapped_column(
+        Integer, nullable=True, index=True, default=None
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),

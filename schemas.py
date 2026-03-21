@@ -8,6 +8,7 @@ class CommentCreate(BaseModel):
     nickname: str
     password: str
     content: str
+    parent_id: int | None = None
 
     @field_validator("nickname")
     @classmethod
@@ -43,6 +44,8 @@ class CommentResponse(BaseModel):
     nickname: str
     content: str
     created_at: datetime
+    parent_id: int | None = None
+    replies: list["CommentResponse"] = []
 
     model_config = {"from_attributes": True}
 
