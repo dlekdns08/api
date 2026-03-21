@@ -10,6 +10,29 @@ from schemas import ReactionToggle, ReactionResponse, ReactionCount, ALLOWED_EMO
 router = APIRouter(prefix="/posts", tags=["reactions"])
 
 
+@router.get("/reactions/bulk")
+def get_reactions_bulk(
+    slugs: str = Query(..., description="쉼표로 구분된 슬러그 목록"),
+    db: Session = Depends(get_db),
+) -> dict[str, dict[str, int]]:
+    """여러 포스트의 반응 수를 한번에 조회 — { slug: { emoji: count } } 반환"""
+    slug_list = [s.strip() for s in slugs.split(",") if s.strip()]
+    if not slug_list:
+        return {}
+
+    rows = (
+        db.query(Reaction.post_slug, Reaction.emoji, func.count(Reaction.id).label("cnt"))
+        .filter(Reaction.post_slug.in_(slug_list))
+        .group_by(Reaction.post_slug, Reaction.emoji)
+        .all()
+    )
+
+    result: dict[str, dict[str, int]] = {slug: {} for slug in slug_list}
+    for slug, emoji, cnt in rows:
+        result[slug][emoji] = cnt
+    return result
+
+
 def _get_reaction_state(slug: str, client_id: str, db: Session) -> ReactionResponse:
     rows = (
         db.query(Reaction.emoji, func.count(Reaction.id).label("cnt"))
