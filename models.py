@@ -34,6 +34,23 @@ class Like(Base):
     )
 
 
+class Reaction(Base):
+    __tablename__ = "reactions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    post_slug: Mapped[str] = mapped_column(String(255), index=True, nullable=False)
+    client_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    emoji: Mapped[str] = mapped_column(String(10), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+    )
+
+    __table_args__ = (
+        UniqueConstraint("post_slug", "client_id", "emoji", name="uq_reaction_per_client"),
+    )
+
+
 class Subscriber(Base):
     __tablename__ = "subscribers"
 

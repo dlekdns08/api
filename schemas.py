@@ -69,3 +69,39 @@ class LikeToggle(BaseModel):
 class LikeResponse(BaseModel):
     liked: bool
     count: int
+
+
+# ── Reactions ───────────────────────────────────────────────
+
+ALLOWED_EMOJIS = ["❤️", "👍", "😄", "🤔", "🚀", "🎉"]
+
+
+class ReactionToggle(BaseModel):
+    client_id: str
+    emoji: str
+
+    @field_validator("client_id")
+    @classmethod
+    def valid_uuid(cls, v: str) -> str:
+        import re
+        pattern = r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        if not re.match(pattern, v, re.IGNORECASE):
+            raise ValueError("유효하지 않은 client_id입니다.")
+        return v
+
+    @field_validator("emoji")
+    @classmethod
+    def valid_emoji(cls, v: str) -> str:
+        if v not in ALLOWED_EMOJIS:
+            raise ValueError("허용되지 않은 이모지입니다.")
+        return v
+
+
+class ReactionCount(BaseModel):
+    emoji: str
+    count: int
+    reacted: bool
+
+
+class ReactionResponse(BaseModel):
+    reactions: list[ReactionCount]
