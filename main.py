@@ -4,7 +4,7 @@ from prometheus_fastapi_instrumentator import Instrumentator
 from sqlalchemy import text
 
 from database import engine, Base
-from routes import comments, likes, subscribe, reactions, views
+from routes import comments, likes, subscribe, reactions, views, knowledge_graph
 
 # 테이블 자동 생성
 Base.metadata.create_all(bind=engine)
@@ -40,6 +40,7 @@ app.include_router(likes.router)
 app.include_router(reactions.router)
 app.include_router(views.router)
 app.include_router(subscribe.router)
+app.include_router(knowledge_graph.router)
 
 
 @app.get("/health")
