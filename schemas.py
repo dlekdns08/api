@@ -108,3 +108,39 @@ class ReactionCount(BaseModel):
 
 class ReactionResponse(BaseModel):
     reactions: list[ReactionCount]
+
+
+# ── Post Knowledge Graph ─────────────────────────────────────
+
+class PostInput(BaseModel):
+    slug: str
+    title: str
+    category: str
+    subcategory: str | None = None
+    tags: list[str] = []
+    date: str
+
+
+class GraphBuildRequest(BaseModel):
+    posts: list[PostInput]
+
+
+class GraphNode(BaseModel):
+    id: str
+    title: str
+    category: str
+    subcategory: str | None
+    tags: list[str]
+    date: str
+
+
+class GraphEdge(BaseModel):
+    source: str
+    target: str
+    weight: float
+
+
+class GraphResponse(BaseModel):
+    nodes: list[GraphNode]
+    edges: list[GraphEdge]
+    built_at: datetime
