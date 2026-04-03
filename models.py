@@ -78,3 +78,15 @@ class PostView(Base):
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
     )
+
+
+class PostGraphCache(Base):
+    __tablename__ = "post_graph_cache"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, default=1)
+    nodes_json: Mapped[str] = mapped_column(Text, nullable=False)
+    edges_json: Mapped[str] = mapped_column(Text, nullable=False)
+    built_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+    )
