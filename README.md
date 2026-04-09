@@ -52,4 +52,4 @@ docker compose up -d
 ## 관련 프로젝트
 
 - [blog](https://github.com/dlekdns08/blog) — Next.js 프론트엔드
-<!-- trigger -->
+
