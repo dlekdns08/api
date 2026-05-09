@@ -1,11 +1,12 @@
 import bcrypt
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from database import get_db
 from models import Comment
 from schemas import CommentCreate, CommentResponse, CommentDelete
+from email_utils import notify_admin_comment
 
 router = APIRouter(prefix="/posts", tags=["comments"])
 
