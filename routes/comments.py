@@ -66,8 +66,13 @@ def get_comments(slug: str, db: Session = Depends(get_db)):
 
 
 @router.post("/{slug:path}/comments", response_model=CommentResponse, status_code=status.HTTP_201_CREATED)
-def create_comment(slug: str, body: CommentCreate, db: Session = Depends(get_db)):
-    """댓글/대댓글 작성"""
+def create_comment(
+    slug: str,
+    body: CommentCreate,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
+    """댓글/대댓글 작성 + 관리자 메일 알림 (백그라운드)"""
     if body.parent_id is not None:
         parent = db.query(Comment).filter(
             Comment.id == body.parent_id,
@@ -87,6 +92,16 @@ def create_comment(slug: str, body: CommentCreate, db: Session = Depends(get_db)
     db.add(comment)
     db.commit()
     db.refresh(comment)
+
+    # 관리자 알림 — fire-and-forget (응답 지연 방지). ADMIN_EMAIL 미설정 시 알림 함수가 자동 무시.
+    background_tasks.add_task(
+        notify_admin_comment,
+        post_slug=slug,
+        nickname=comment.nickname,
+        content=comment.content,
+        comment_id=comment.id,
+    )
+
     return _build_response(comment, [])
 
 
