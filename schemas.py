@@ -110,6 +110,49 @@ class ReactionResponse(BaseModel):
     reactions: list[ReactionCount]
 
 
+# ── Game Rankings ───────────────────────────────────────────
+
+class GameScoreSubmit(BaseModel):
+    nickname: str
+    score: int
+    client_id: str
+
+    @field_validator("nickname")
+    @classmethod
+    def nickname_ok(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            v = "익명 코알라"
+        return v[:20]
+
+    @field_validator("score")
+    @classmethod
+    def score_ok(cls, v: int) -> int:
+        if v <= 0:
+            raise ValueError("점수는 0보다 커야 합니다.")
+        if v > 10_000_000:
+            raise ValueError("비정상적인 점수입니다.")
+        return v
+
+    @field_validator("client_id")
+    @classmethod
+    def valid_uuid(cls, v: str) -> str:
+        import re
+        pattern = r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        if not re.match(pattern, v, re.IGNORECASE):
+            raise ValueError("유효하지 않은 client_id입니다.")
+        return v
+
+
+class GameRankingItem(BaseModel):
+    id: int
+    nickname: str
+    score: int
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
 # ── Post Knowledge Graph ─────────────────────────────────────
 
 class PostInput(BaseModel):
