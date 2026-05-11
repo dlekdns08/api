@@ -80,6 +80,20 @@ class PostView(Base):
     )
 
 
+class GameRanking(Base):
+    __tablename__ = "game_rankings"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    game: Mapped[str] = mapped_column(String(50), index=True, nullable=False)
+    nickname: Mapped[str] = mapped_column(String(20), nullable=False)
+    score: Mapped[int] = mapped_column(Integer, index=True, nullable=False)
+    client_id: Mapped[str] = mapped_column(String(36), index=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+    )
+
+
 class PostGraphCache(Base):
     __tablename__ = "post_graph_cache"
 
